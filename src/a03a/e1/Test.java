@@ -43,7 +43,7 @@ public class Test {
 	
 	@org.junit.Before
 	public void initFactory() {
-		// this.factory = new DecisionChainFactoryImpl();
+		this.factory = new DecisionChainFactoryImpl();
 	}
 	
 	@org.junit.Test
