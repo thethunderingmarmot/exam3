@@ -43,7 +43,6 @@ public class DecisionChainFactoryImpl implements DecisionChainFactory {
 
     @Override
     public <A, B> DecisionChain<A, B> enumerationLike(List<Pair<A, B>> mapList, B defaultReply) {
-        List<Pair<A, B>> modifiableMapList = new LinkedList<>(mapList);
         return new DecisionChain<A,B>() {
 
             @Override
@@ -57,6 +56,7 @@ public class DecisionChainFactoryImpl implements DecisionChainFactory {
 
             @Override
             public DecisionChain<A, B> next(A a) {
+                List<Pair<A, B>> modifiableMapList = new LinkedList<>(mapList);
                 modifiableMapList.remove(0);
                 return enumerationLike(modifiableMapList, defaultReply);
             }
@@ -83,8 +83,24 @@ public class DecisionChainFactoryImpl implements DecisionChainFactory {
 
     @Override
     public <A, B> DecisionChain<A, B> switchChain(List<Pair<Predicate<A>, B>> cases, B defaultReply) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'switchChain'");
+        return new DecisionChain<A,B>() {
+
+            @Override
+            public Optional<B> result(A a) {
+                if(cases.size() > 0) {
+                    return cases.get(0).get1().test(a) ? Optional.of(cases.get(0).get2()) : Optional.empty();
+                } else {
+                    return Optional.of(defaultReply);
+                }
+            }
+
+            @Override
+            public DecisionChain<A, B> next(A a) {
+                List<Pair<Predicate<A>, B>> modifiableCases = new LinkedList<>(cases);
+                modifiableCases.remove(0);
+                return switchChain(modifiableCases, defaultReply);
+            }
+        };
     }
 
 }
