@@ -53,7 +53,7 @@ public class Test {
 	
 	@org.junit.Before
 	public void initFactory() {
-		//this.factory = new UniversityProgramFactoryImpl();
+		this.factory = new UniversityProgramFactoryImpl();
 	}
 	
 	private void fillProgram(UniversityProgram program) {
