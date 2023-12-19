@@ -47,7 +47,7 @@ public class DecisionChainFactoryImpl implements DecisionChainFactory {
 
             @Override
             public Optional<B> result(A a) {
-                if(mapList.size() > 0) {
+                if(!mapList.isEmpty()) {
                     return mapList.get(0).get1() == a ? Optional.of(mapList.get(0).get2()) : Optional.empty();
                 } else {
                     return Optional.of(defaultReply);
@@ -87,7 +87,7 @@ public class DecisionChainFactoryImpl implements DecisionChainFactory {
 
             @Override
             public Optional<B> result(A a) {
-                if(cases.size() > 0) {
+                if(!cases.isEmpty()) {
                     return cases.get(0).get1().test(a) ? Optional.of(cases.get(0).get2()) : Optional.empty();
                 } else {
                     return Optional.of(defaultReply);
