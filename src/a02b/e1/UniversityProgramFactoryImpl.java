@@ -1,10 +1,6 @@
 package a02b.e1;
 
-import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
-
-import a02b.e1.UniversityProgram.Sector;
 
 public class UniversityProgramFactoryImpl implements UniversityProgramFactory {
 
@@ -13,8 +9,10 @@ public class UniversityProgramFactoryImpl implements UniversityProgramFactory {
         return new UniversityProgramImpl() {
 
             @Override
-            public boolean isValid(Set<String> courseNames) {
-                return getAllCredits(courseNames) == 60;
+            public Set<Constraint<Sector, Integer>> getConstraints() {
+                return Set.of(
+                    new Constraint<>(s -> true, c -> c == 60)
+                );   
             }
 
         };
@@ -25,12 +23,15 @@ public class UniversityProgramFactoryImpl implements UniversityProgramFactory {
         return new UniversityProgramImpl() {
 
             @Override
-            public boolean isValid(Set<String> courseNames) {
-                return getAllCredits(courseNames) == 60
-                    && getCreditsOf(sector -> sector == Sector.MATHEMATICS, courseNames) >= 12
-                    && getCreditsOf(sector -> sector == Sector.COMPUTER_SCIENCE, courseNames) >= 12
-                    && getCreditsOf(sector -> sector == Sector.PHYSICS, courseNames) >= 12;
+            public Set<Constraint<Sector, Integer>> getConstraints() {
+                return Set.of(
+                    new Constraint<>(s -> true, c -> c == 60),
+                    new Constraint<>(s -> s == Sector.MATHEMATICS, c -> c >= 12),
+                    new Constraint<>(s -> s == Sector.COMPUTER_SCIENCE, c -> c >= 12),
+                    new Constraint<>(s -> s == Sector.PHYSICS, c -> c >= 12)
+                );   
             }
+
 
         };
     }
@@ -40,11 +41,14 @@ public class UniversityProgramFactoryImpl implements UniversityProgramFactory {
         return new UniversityProgramImpl() {
 
             @Override
-            public boolean isValid(Set<String> courseNames) {
-                return getAllCredits(courseNames) >= 48
-                    && getCreditsOf(sector -> sector == Sector.COMPUTER_SCIENCE || sector == Sector.COMPUTER_ENGINEERING, courseNames) >= 30;
+            public Set<Constraint<Sector, Integer>> getConstraints() {
+                return Set.of(
+                    new Constraint<>(s -> true, c -> c >= 48),
+                    new Constraint<>(s -> s == Sector.COMPUTER_SCIENCE || s == Sector.COMPUTER_ENGINEERING, c -> c >= 30)
+                );  
             }
-            
+
+
         };
     }
 
@@ -53,12 +57,15 @@ public class UniversityProgramFactoryImpl implements UniversityProgramFactory {
         return new UniversityProgramImpl() {
 
             @Override
-            public boolean isValid(Set<String> courseNames) {
-                return getAllCredits(courseNames) == 120
-                    && getCreditsOf(sector -> sector == Sector.COMPUTER_SCIENCE || sector == Sector.COMPUTER_ENGINEERING, courseNames) >= 60
-                    && getCreditsOf(sector -> sector == Sector.MATHEMATICS || sector == Sector.PHYSICS, courseNames) <= 18
-                    && getCreditsOf(sector -> sector == Sector.THESIS, courseNames) == 24;
+            public Set<Constraint<Sector, Integer>> getConstraints() {
+                return Set.of(
+                    new Constraint<>(s -> true, c -> c == 120),
+                    new Constraint<>(s -> s == Sector.COMPUTER_SCIENCE || s == Sector.COMPUTER_ENGINEERING, c -> c >= 60),
+                    new Constraint<>(s -> s == Sector.MATHEMATICS || s == Sector.PHYSICS, c -> c <= 18),
+                    new Constraint<>(s -> s == Sector.THESIS, c -> c == 24)
+                );  
             }
+
 
         };
     }

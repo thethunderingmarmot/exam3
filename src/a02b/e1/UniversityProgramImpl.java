@@ -9,7 +9,8 @@ import java.util.stream.Stream;
 public abstract class UniversityProgramImpl implements UniversityProgram {
 
     private record Course(Sector sector, Integer credits) {};
-    
+    public record Constraint<T1, T2>(Predicate<T1> c1, Predicate<T2> c2) {};
+
     protected final Map<String, Course> courses = new HashMap<>();
 
     @Override
@@ -17,19 +18,21 @@ public abstract class UniversityProgramImpl implements UniversityProgram {
         courses.put(name, new Course(sector, credits));
     }
 
-    protected Stream<Course> select(Set<String> courseNames) {
+    private Stream<Course> select(Set<String> courseNames) {
         return courses.entrySet().stream().filter(e -> courseNames.contains(e.getKey())).map(e -> e.getValue());
     }
 
-    public int getCreditsOf(Predicate<Sector> selectedSectors, Set<String> courseNames) {
-        return select(courseNames).filter(p -> selectedSectors.test(p.sector)).mapToInt(p -> p.credits).sum();
+    private boolean checkConstraint(Constraint<Sector, Integer> constraint, Set<String> courseNames) {
+        return constraint.c2.test(
+            select(courseNames).filter(c -> constraint.c1.test(c.sector)).mapToInt(c -> c.credits).sum()
+        );
     }
 
-    public int getAllCredits(Set<String> courseNames) {
-        return select(courseNames).mapToInt(p -> p.credits).sum();
-    }
+    public abstract Set<Constraint<Sector, Integer>> getConstraints();
 
     @Override
-    public abstract boolean isValid(Set<String> courseNames);
+    public boolean isValid(Set<String> courseNames) {
+        return getConstraints().stream().allMatch(c -> checkConstraint(c, courseNames));
+    }
     
 }
