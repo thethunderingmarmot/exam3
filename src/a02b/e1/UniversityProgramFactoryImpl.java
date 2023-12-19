@@ -12,7 +12,7 @@ public class UniversityProgramFactoryImpl implements UniversityProgramFactory {
             public Set<Constraint<Sector, Integer>> getConstraints() {
                 return Set.of(
                     new Constraint<>(s -> true, c -> c == 60)
-                );   
+                );
             }
 
         };
