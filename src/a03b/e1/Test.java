@@ -45,7 +45,7 @@ public class Test {
 	
 	@org.junit.Before
 	public void initFactory() {
-		//this.factory = new LensFactoryImpl();
+		this.factory = new LensFactoryImpl();
 	}
 	
 	@org.junit.Test
