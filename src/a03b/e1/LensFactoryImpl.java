@@ -1,12 +1,11 @@
 package a03b.e1;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-import javax.swing.text.html.ParagraphView;
+import javax.swing.text.html.parser.Element;
 
 public class LensFactoryImpl implements LensFactory {
 
@@ -86,21 +85,19 @@ public class LensFactoryImpl implements LensFactory {
 
     @Override
     public <A, B, C> Lens<List<Pair<A, Pair<B, C>>>, C> rightRightAtPos(int i) {
-        Lens<List<Pair<A, Pair<B, C>>>, Pair<A, Pair<B, C>>> indexer = indexer(i);
-        Lens<Pair<A, Pair<B, C>>, Pair<B, C>> right1 = right();
-        Lens<Pair<B, C>, C> right2 = right();
-
 
         return new Lens<List<Pair<A,Pair<B,C>>>,C>() {
 
             @Override
             public C get(List<Pair<A, Pair<B, C>>> s) {
-                return right2.get(right1.get(indexer.get(s)));
+                return s.get(i).get2().get2();
             }
 
             @Override
             public List<Pair<A, Pair<B, C>>> set(C a, List<Pair<A, Pair<B, C>>> s) {
-                right2.set(a, right1.set(new Pair<A, Pair<B, C>>(right1.get(indexer.get(s))), );
+                List<Pair<A, Pair<B, C>>> temp = new ArrayList<>(s);
+                temp.set(i, new Pair<A,Pair<B,C>>(temp.get(i).get1(), new Pair<B,C>(temp.get(i).get2().get1(), a)));
+                return temp;
             }
             
         };
