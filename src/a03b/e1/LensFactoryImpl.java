@@ -4,103 +4,67 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import javax.swing.text.html.parser.Element;
+import java.util.stream.Stream;
 
 public class LensFactoryImpl implements LensFactory {
 
-    @Override
-    public <E> Lens<List<E>, E> indexer(int i) {
-        return new Lens<List<E>,E>() {
-            
+    private <Source, Item> Lens<Source, Item> generic(Function<Source, Item> getter, BiFunction<Item, Source, Source> setter) {
+        return new Lens<Source,Item>() {
+
             @Override
-            public E get(List<E> s) {
-                return s.get(i);
+            public Item get(Source s) {
+                return getter.apply(s);
             }
 
             @Override
-            public List<E> set(E a, List<E> s) {
-                List<E> temp = new ArrayList<>(s);
-                temp.set(i, a);
-                return temp;
+            public Source set(Item a, Source s) {
+                return setter.apply(a, s);
             }
             
         };
     }
 
+    private <Item> List<Item> copyListAndSet(List<Item> sourceList, Item itemToSet, int atIndex) {
+        List<Item> newList = new ArrayList<>(sourceList);
+        newList.set(atIndex, itemToSet);
+        return newList;
+    }
+
+    private <Left, Right> Pair<Left, Right> copyPairAndSetLeft(Pair<Left, Right> sourcePair, Left itemToSet) {
+        return new Pair<Left,Right>(itemToSet, sourcePair.get2());
+    } 
+
+    private <Left, Right> Pair<Left, Right> copyPairAndSetRight(Pair<Left, Right> sourcePair, Right itemToSet) {
+        return new Pair<Left,Right>(sourcePair.get1(), itemToSet);
+    } 
+
     @Override
-    public <E> Lens<List<List<E>>, E> doubleIndexer(int i, int j) {
-        return new Lens<List<List<E>>,E>() {
-
-            @Override
-            public E get(List<List<E>> s) {
-                return s.get(i).get(j);
-            }
-
-            @Override
-            public List<List<E>> set(E a, List<List<E>> s) {
-                List<List<E>> temp = new ArrayList<>();
-                temp.addAll(s.stream().map(l -> new ArrayList<>(l)).toList());
-
-                temp.get(i).set(j, a);
-                return temp;
-            }
-            
-        };
+    public <E> Lens<List<E>, E> indexer(int i) {
+        return generic(source -> source.get(i), (item, source) -> copyListAndSet(source, item, i));
     }
 
     @Override
     public <A, B> Lens<Pair<A, B>, A> left() {
-        return new Lens<Pair<A,B>,A>() {
-
-            @Override
-            public A get(Pair<A, B> s) {
-                return s.get1();
-            }
-
-            @Override
-            public Pair<A, B> set(A a, Pair<A, B> s) {
-                return new Pair<A,B>(a, s.get2());
-            }
-            
-        };
+        return generic(source -> source.get1(), (item, source) -> copyPairAndSetLeft(source, item));
     }
 
     @Override
     public <A, B> Lens<Pair<A, B>, B> right() {
-        return new Lens<Pair<A,B>,B>() {
+        return generic(source -> source.get2(), (item, source) -> copyPairAndSetRight(source, item));
+    }
 
-            @Override
-            public B get(Pair<A, B> s) {
-                return s.get2();
-            }
+    private <Source, SourceItem, Item> Lens<Source, Item> fusionator9000(Lens<Source, SourceItem> lens1, Lens<SourceItem, Item> lens2) {
+        return generic(source -> lens2.get(lens1.get(source)), (item, source) -> lens1.set(lens2.set(item, lens1.get(source)), source));
+    }
 
-            @Override
-            public Pair<A, B> set(B a, Pair<A, B> s) {
-                return new Pair<A,B>(s.get1(), a);
-            }
-            
-        };
+    @Override
+    public <E> Lens<List<List<E>>, E> doubleIndexer(int i, int j) {
+        return fusionator9000(indexer(i), indexer(j));
     }
 
     @Override
     public <A, B, C> Lens<List<Pair<A, Pair<B, C>>>, C> rightRightAtPos(int i) {
-
-        return new Lens<List<Pair<A,Pair<B,C>>>,C>() {
-
-            @Override
-            public C get(List<Pair<A, Pair<B, C>>> s) {
-                return s.get(i).get2().get2();
-            }
-
-            @Override
-            public List<Pair<A, Pair<B, C>>> set(C a, List<Pair<A, Pair<B, C>>> s) {
-                List<Pair<A, Pair<B, C>>> temp = new ArrayList<>(s);
-                temp.set(i, new Pair<A,Pair<B,C>>(temp.get(i).get1(), new Pair<B,C>(temp.get(i).get2().get1(), a)));
-                return temp;
-            }
-            
-        };
+        return fusionator9000(indexer(i), fusionator9000(right(), right()));
     }
 
 }
